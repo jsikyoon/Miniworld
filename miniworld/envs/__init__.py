@@ -16,6 +16,9 @@ from miniworld.envs.threerooms import ThreeRooms
 from miniworld.envs.tmaze import TMaze, TMazeLeft, TMazeRight
 from miniworld.envs.wallgap import WallGap
 from miniworld.envs.ymaze import YMaze, YMazeLeft, YMazeRight
+from miniworld.envs.custom_v0 import CustomV0
+from miniworld.envs.custom_v1 import CustomV1
+from miniworld.envs.custom_yb import CustomYB
 
 # Registered environment ids
 from miniworld.miniworld import MiniWorldEnv
