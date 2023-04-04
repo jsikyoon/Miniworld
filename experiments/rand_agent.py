@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-import gym
+import pyglet
+pyglet.options['headless'] = True
+import miniworld
+import gymnasium as gym
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -58,14 +61,14 @@ print("num actions:", env.action_space.n)
 print("max episode steps:", env.max_episode_steps)
 
 
-def evaluate(model, seed=0, num_episodes=100):
+def evaluate(model, seed=0, num_episodes=1):
     env = gym.make("MiniWorld-Hallway-v0")
-    env.seed(seed)
+    #env.seed(seed)
 
     num_success = 0
     for i in range(num_episodes):
         # print(i)
-        obs = env.reset()
+        obs, _ = env.reset(seed=seed)
         memory = Variable(torch.zeros([1, 128])).cuda()
         while True:
             obs = obs.transpose(2, 0, 1)
@@ -74,8 +77,8 @@ def evaluate(model, seed=0, num_episodes=100):
             dist, memory = model.predict_action(obs, memory)
             action = dist.sample()
 
-            obs, reward, done, info = env.step(action)
-            if done:
+            obs, reward, terminated, truncated, info = env.step(action)
+            if terminated or truncated:
                 if reward > 0:
                     # print('success')
                     num_success += 1
