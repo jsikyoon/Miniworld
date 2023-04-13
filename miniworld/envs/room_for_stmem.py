@@ -77,7 +77,7 @@ class RoomSTMEM(MiniWorldEnv, utils.EzPickle):
         #    )
         #self.place_entity(Key(color=colorlist[self.np_random.choice(len(colorlist))]))
 
-        self.place_agent(dir=0.0, pos=[self.size/2, 0, self.size/2])
+        self.place_agent(dir=0.785, pos=[self.size/2, 0, self.size/2])
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)

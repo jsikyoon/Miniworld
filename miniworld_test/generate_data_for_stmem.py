@@ -20,28 +20,19 @@ from miniworld_test.policy_interaction import *
 import skvideo.io
 from einops import rearrange
 import matplotlib.pyplot as plt
+from PIL import Image
+import imageio
 
-def generate_video(image, dir, idx):
+def generate_video(memory_image, gt_image, query_image, dir, idx):
 
-    total_steps, h, w, c = image.shape  # _, 84(h=y), 84(w=x)
-
-    # make video
-    video = image
-    fps = '4'
-    crf = '17'
-    vid_out = skvideo.io.FFmpegWriter(f'{dir}/video_{idx}.mp4',
-                inputdict={'-r': fps},
-                outputdict={'-r': fps, '-c:v': 'libx264', '-crf': crf,
-                            '-preset': 'ultrafast', '-pix_fmt': 'yuv444p'}
-    )
-
-    for frame in video:
-        vid_out.writeFrame(frame)
-    vid_out.close()
-
+    imageio.mimsave(f'{dir}/memory_{idx}.gif', memory_image, fps=4)    
+    for i in range(len(gt_image)):
+        imageio.mimsave(f'{dir}/gt{i}_{idx}.gif', gt_image[i], fps=4)    
+    for i in range(len(query_image)):
+        Image.fromarray(query_image[i]).save(f'{dir}/query{i}_{idx}.png')
 
 # setting
-total_num_ep = 5000
+total_num_ep = 10000
 data_dir = f'./datasets/room_with_without_objects_stmem'
 Path(data_dir).mkdir(parents=True, exist_ok=True)
 data_type = {'train': int(total_num_ep * 0.9),
@@ -71,6 +62,49 @@ for type, num_ep in data_type.items():
         dict['memory_image'] = np.array(obss_with_objects)
         dict['memory_dir'] = np.array(dirs_with_objects)
         
+        # get ground truth images
+        obss_with_objects, dirs_with_objects = [], []
+        obs, _, _, _, _ = env_with_objects.step(0) # back to original position
+        def collect_gt_images(obs):
+            gt_images, gt_dirs = [], []
+            while True:
+                if env_with_objects.action_start() == 0:
+                    break
+                obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+            gt_images.append(obs['image'])
+            gt_dirs.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+            for _ in range(3): # collect 3 images
+                obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+                gt_images.append(obs['image'])
+                gt_dirs.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+            return gt_images, gt_dirs
+        # left
+        for _ in range(9): # move from 45 to 90
+            obs, _, _, _, _ = env_with_objects.step(0) # turn left
+        gt_images, gt_dirs = collect_gt_images(obs)
+        obss_with_objects.append(gt_images)
+        dirs_with_objects.append(gt_dirs)
+        # back
+        for _ in range(18): # move from 90 to 180
+            obs, _, _, _, _ = env_with_objects.step(0) # turn left
+        gt_images, gt_dirs = collect_gt_images(obs)
+        obss_with_objects.append(gt_images)
+        dirs_with_objects.append(gt_dirs)
+        # right
+        for _ in range(18): # move from 180 to 270
+            obs, _, _, _, _ = env_with_objects.step(0) # turn left
+        gt_images, gt_dirs = collect_gt_images(obs)
+        obss_with_objects.append(gt_images)
+        dirs_with_objects.append(gt_dirs)
+        # front
+        for _ in range(18): # move from 180 to 270
+            obs, _, _, _, _ = env_with_objects.step(0) # turn left
+        gt_images, gt_dirs = collect_gt_images(obs)
+        obss_with_objects.append(gt_images)
+        dirs_with_objects.append(gt_dirs)
+        dict["gt_image"] = np.array(obss_with_objects)
+        dict["gt_dir"] = np.array(dirs_with_objects)
+      
         # observations without objects (front / left / back / right views)
         obss_without_objects, dirs_without_objects = [], []
         obs, info = env_without_objects.reset(seed=seed)
@@ -100,7 +134,10 @@ for type, num_ep in data_type.items():
         Path(f'{data_dir}/{type}').mkdir(parents=True, exist_ok=True)
         # save first 10 videos
         if type == 'train' and j < 10:
-            generate_video(dict['image'].copy().astype(np.uint8), data_dir, j)
-            exit(1)
+            generate_video(
+                dict['memory_image'].copy().astype(np.uint8),
+                dict['gt_image'].copy().astype(np.uint8),
+                dict['query_image'].copy().astype(np.uint8),
+                data_dir, j)
         print(f'saving {type}/{j}-th episode in npz...')
         np.savez(f'{data_dir}/{type}/{j}.npz', **dict)

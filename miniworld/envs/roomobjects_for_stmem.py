@@ -68,6 +68,8 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             "up_and_down": [
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
             ],
             "left_and_right": [
                 [-1, 0, 0], # move left
@@ -91,6 +93,8 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [0, -1, 0], # move down
             ],
             "up_and_down": [
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
             ],
@@ -157,3 +161,9 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             self.entities[i].pos = [x + y for x, y in zip(self.entities[i].pos, self._actions[i][self._action_idxs[i]])]
             self._action_idxs[i] = (self._action_idxs[i] + 1) % len(self._actions[i])
         return obs, reward, termination, truncation, info
+
+    def action_start(self):
+        if self._action_idxs[0] == 0:
+            return True
+        else:
+            return False
