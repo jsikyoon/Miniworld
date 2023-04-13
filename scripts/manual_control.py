@@ -46,7 +46,7 @@ print("============")
 print("move: arrow keys\npickup: P\ndrop: D\ndone: ENTER\nquit: ESC")
 print("============")
 
-env.reset(seed=0)
+env.reset()
 
 # Create the display window
 env.render()

@@ -64,22 +64,39 @@ for type, num_ep in data_type.items():
         obs, info = env_with_objects.reset(seed=seed)
         obss_with_objects.append(obs['image'])
         dirs_with_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-        for _ in range(23): # 360 / 15
+        for _ in range(71): # 360 / 5
             obs, _, _, _, _ = env_with_objects.step(0) # turn left
             obss_with_objects.append(obs['image'])
             dirs_with_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-        # observations without objects
+        dict['memory_image'] = np.array(obss_with_objects)
+        dict['memory_dir'] = np.array(dirs_with_objects)
+        
+        # observations without objects (front / left / back / right views)
         obss_without_objects, dirs_without_objects = [], []
         obs, info = env_without_objects.reset(seed=seed)
+        # left
+        for _ in range(9): # move from 45 to 90
+            obs, _, _, _, _ = env_without_objects.step(0) # turn left
         obss_without_objects.append(obs['image'])
         dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-        for _ in range(23): # 360 / 15
+        # back
+        for _ in range(18): # move from 90 to 180
             obs, _, _, _, _ = env_without_objects.step(0) # turn left
-            obss_without_objects.append(obs['image'])
-            dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+        obss_without_objects.append(obs['image'])
+        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+        # right
+        for _ in range(18): # move from 180 to 270
+            obs, _, _, _, _ = env_without_objects.step(0) # turn left
+        obss_without_objects.append(obs['image'])
+        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+        # front
+        for _ in range(18): # move from 270 to 0
+            obs, _, _, _, _ = env_without_objects.step(0) # turn left
+        obss_without_objects.append(obs['image'])
+        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+        dict['query_image'] = np.array(obss_without_objects)
+        dict['query_dir'] = np.array(dirs_without_objects)
 
-        dict['image'] = np.array(obss_with_objects + obss_without_objects)
-        dict['agent_dir'] = np.array(dirs_with_objects + dirs_without_objects)
         Path(f'{data_dir}/{type}').mkdir(parents=True, exist_ok=True)
         # save first 10 videos
         if type == 'train' and j < 10:
