@@ -589,6 +589,7 @@ class MiniWorldEnv(gym.Env):
         This also randomizes many environment parameters (domain randomization)
         """
         super().reset(seed=seed)
+        np.random.seed(seed)
 
         # Step count since episode start
         self.step_count = 0
