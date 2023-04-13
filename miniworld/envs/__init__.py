@@ -10,6 +10,8 @@ from miniworld.envs.oneroom import OneRoom, OneRoomS6, OneRoomS6Fast
 from miniworld.envs.pickupobjects import PickupObjects
 from miniworld.envs.putnext import PutNext
 from miniworld.envs.roomobjects import RoomObjects
+from miniworld.envs.room_for_stmem import RoomSTMEM
+from miniworld.envs.roomobjects_for_stmem import RoomObjectsSTMEM
 from miniworld.envs.sidewalk import Sidewalk
 from miniworld.envs.sign import Sign
 from miniworld.envs.threerooms import ThreeRooms
