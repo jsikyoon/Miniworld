@@ -7,6 +7,10 @@ from miniworld.miniworld import MiniWorldEnv
 
 import numpy as np
 
+obs_width=84
+obs_height=84
+window_width=840
+window_height=840
 
 class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
     """
@@ -107,7 +111,12 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         }
 
 
-        MiniWorldEnv.__init__(self, max_episode_steps=math.inf, **kwargs)
+        MiniWorldEnv.__init__(self, 
+                              obs_width=obs_width,
+                              obs_height=obs_height,
+                              window_width=window_width,
+                              window_height=window_height,
+                              max_episode_steps=math.inf, **kwargs)
         utils.EzPickle.__init__(self, size, **kwargs)
         
     def _gen_world(self):
