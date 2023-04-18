@@ -25,15 +25,15 @@ import imageio
 
 def generate_video(memory_image, gt_image, query_image, dir, idx):
 
-    imageio.mimsave(f'{dir}/memory_{idx}.gif', memory_image, fps=4)    
+    imageio.mimsave(f'{dir}/memory_{idx}.gif', memory_image, fps=4)
     for i in range(len(gt_image)):
-        imageio.mimsave(f'{dir}/gt{i}_{idx}.gif', gt_image[i], fps=4)    
+        imageio.mimsave(f'{dir}/gt{i}_{idx}.gif', gt_image[i], fps=4)
     for i in range(len(query_image)):
         Image.fromarray(query_image[i]).save(f'{dir}/query{i}_{idx}.png')
 
 # setting
 total_num_ep = 10000
-data_dir = f'./datasets/room_with_without_objects_stmem'
+data_dir = f'./datasets/room_with_without_objects_stmem_same_walls'
 Path(data_dir).mkdir(parents=True, exist_ok=True)
 data_type = {'train': int(total_num_ep * 0.9),
              'eval': int(total_num_ep * 0.1)}
@@ -49,6 +49,10 @@ for type, num_ep in data_type.items():
     else:
         seed = num_ep
     for j in range(num_ep):
+        if type == 'eval':
+            seed = data_type['train'] + j
+        else:
+            seed = j
         dict = {}
         # observations with objects
         obss_with_objects, dirs_with_objects = [], []
@@ -61,19 +65,20 @@ for type, num_ep in data_type.items():
             dirs_with_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
         dict['memory_image'] = np.array(obss_with_objects)
         dict['memory_dir'] = np.array(dirs_with_objects)
-        
+
         # get ground truth images
         obss_with_objects, dirs_with_objects = [], []
         obs, _, _, _, _ = env_with_objects.step(0) # back to original position
         def collect_gt_images(obs):
             gt_images, gt_dirs = [], []
             while True:
-                if env_with_objects.action_start() == 0:
+                if env_with_objects.action_start():
                     break
                 obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+            obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
             gt_images.append(obs['image'])
             gt_dirs.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-            for _ in range(3): # collect 3 images
+            for _ in range(5): # collect 5 images
                 obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
                 gt_images.append(obs['image'])
                 gt_dirs.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
@@ -104,7 +109,7 @@ for type, num_ep in data_type.items():
         dirs_with_objects.append(gt_dirs)
         dict["gt_image"] = np.array(obss_with_objects)
         dict["gt_dir"] = np.array(dirs_with_objects)
-      
+
         # observations without objects (front / left / back / right views)
         obss_without_objects, dirs_without_objects = [], []
         obs, info = env_without_objects.reset(seed=seed)

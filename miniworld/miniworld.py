@@ -74,7 +74,6 @@ from miniworld.params import DEFAULT_PARAMS
 
 # Default wall height for room
 DEFAULT_WALL_HEIGHT = 2.74
-DEFAULT_WALL_HEIGHT = DEFAULT_WALL_HEIGHT * (2/3)
 
 # Texture size/density in texels/meter
 TEX_DENSITY = 512
@@ -293,7 +292,7 @@ class Room:
         """
 
         # Load the textures and do texture randomization
-        self.wall_tex = Texture.get(self.wall_tex_name, rng)  # default wall texture
+        self.wall_tex = Texture.get(self.wall_tex_name, rng)
         self.floor_tex = Texture.get(self.floor_tex_name, rng)
         self.ceil_tex = Texture.get(self.ceil_tex_name, rng)
 
@@ -355,11 +354,9 @@ class Room:
                 seg_end = self.portals[wall_idx][0]["start_pos"]
             else:
                 seg_end = wall_width
-            
+
             # Generate the first polygon (going up to the first portal)
-            for i in range(int(seg_end)):
-                gen_seg_poly(edge_p0, side_vec, i, i+1, 0, self.wall_height)
-            # gen_seg_poly(edge_p0, side_vec, 0, seg_end, 0, self.wall_height)
+            gen_seg_poly(edge_p0, side_vec, 0, seg_end, 0, self.wall_height)
 
             # For each portal in this wall
             for portal_idx, portal in enumerate(self.portals[wall_idx]):
@@ -384,11 +381,9 @@ class Room:
                     next_portal_start = wall_width
 
                 # Generate the polygon going up to the next portal
-                for i in range(int(next_portal_start - end_pos)):
-                    gen_seg_poly(edge_p0, side_vec, end_pos+i, end_pos+i+1, 0, self.wall_height)
-                # gen_seg_poly(
-                #     edge_p0, side_vec, end_pos, next_portal_start, 0, self.wall_height
-                # )
+                gen_seg_poly(
+                    edge_p0, side_vec, end_pos, next_portal_start, 0, self.wall_height
+                )
 
         self.wall_verts = np.array(self.wall_verts)
         self.wall_norms = np.array(self.wall_norms)
@@ -402,37 +397,6 @@ class Room:
             self.wall_texcs = np.concatenate(self.wall_texcs)
         else:
             self.wall_texcs = np.array([]).reshape(0, 2)
-
-
-
-        # randomize wall textures
-        # self.wall_tex_name_list = ['brick_wall', 'grass', 'lava', 'rock',
-        #                            'stucco', 'water', 'wood', 'wood_planks']
-        self.wall_tex_name_list = ['blue', 'orange', 'green', 'red', 'purple',
-                                   'brown', 'pink', 'olive']
-        self.wall_tex_list = [Texture.get(name) for name in self.wall_tex_name_list]
-        
-        n_partial_wall = self.wall_verts.shape[0] // 4  
-        remain = n_partial_wall
-        self.ran_wall_tex_list = []
-        
-        while True:
-            if remain < 5:
-                ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
-                for i in range(remain):
-                    self.ran_wall_tex_list.append(ran_wall_tex)
-                break
-            else:
-                wall_len = np.random.choice([3, 5], 1)[0]
-                ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
-                for i in range(wall_len):
-                    self.ran_wall_tex_list.append(ran_wall_tex)
-                remain -= wall_len
-        
-        # print(remain)
-        # print(n_partial_wall)
-        # print(len(self.ran_wall_tex_list))
-
 
     def _render(self):
         """
@@ -461,17 +425,13 @@ class Room:
             glEnd()
 
         # Draw the walls
-        
-        n_partial_wall = self.wall_verts.shape[0] // 4
-        
-        for j in range(n_partial_wall):
-            self.ran_wall_tex_list[j].bind()
-            glBegin(GL_QUADS)
-            for i in range(4):
-                glNormal3f(*self.wall_norms[j*4+i, :])
-                glTexCoord2f(*self.wall_texcs[j*4+i, :])
-                glVertex3f(*self.wall_verts[j*4+i, :])
-            glEnd()
+        self.wall_tex.bind()
+        glBegin(GL_QUADS)
+        for i in range(self.wall_verts.shape[0]):
+            glNormal3f(*self.wall_norms[i, :])
+            glTexCoord2f(*self.wall_texcs[i, :])
+            glVertex3f(*self.wall_verts[i, :])
+        glEnd()
 
 
 class MiniWorldEnv(gym.Env):
@@ -589,7 +549,6 @@ class MiniWorldEnv(gym.Env):
         This also randomizes many environment parameters (domain randomization)
         """
         super().reset(seed=seed)
-        np.random.seed(seed)
 
         # Step count since episode start
         self.step_count = 0
@@ -638,6 +597,9 @@ class MiniWorldEnv(gym.Env):
         # Pre-compile static parts of the environment into a display list
         self._render_static()
 
+        # Generate the first camera image
+        obs = self.render_obs()
+        
         # Generate the first camera image
         image = self.render_obs()
         top_camera = self.render_top_view()
@@ -854,7 +816,6 @@ class MiniWorldEnv(gym.Env):
 
         idx_a, idx_b = find_facing_edges()
         assert idx_a is not None, "matching edges not found in connect_rooms"
- 
 
         start_a, end_a = room_a.add_portal(
             edge=idx_a, min_x=min_x, max_x=max_x, min_z=min_z, max_z=max_z, max_y=max_y
@@ -1477,5 +1438,7 @@ class MiniWorldEnv(gym.Env):
         if self.render_mode == "human":
             self.window.flip()
             self.window.dispatch_events()
+
+            return
 
         return img

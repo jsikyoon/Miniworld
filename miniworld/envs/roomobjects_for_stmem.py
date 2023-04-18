@@ -61,25 +61,33 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [-1, 0, 0], # move left
                 [0, 1, 0], # move up
                 [1, 0, 0], # move right
+                [1, 0, 0], # move right
                 [0, -1, 0], # move down
+                [-1, 0, 0], # move left
             ],
             "circle_ccw": [
                 [1, 0, 0], # move right
                 [0, 1, 0], # move up
                 [-1, 0, 0], # move left
+                [-1, 0, 0], # move left
                 [0, -1, 0], # move down
+                [1, 0, 0], # move right
             ],
             "up_and_down": [
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
             ],
-            "left_and_right": [
+            "left_and_right_up_and_down": [
                 [-1, 0, 0], # move left
                 [1, 0, 0], # move right
                 [1, 0, 0], # move right
                 [-1, 0, 0], # move left
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
             ],
         }
         
@@ -88,25 +96,33 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [0, 0, -1], # move left
                 [0, 1, 0], # move up
                 [0, 0, 1], # move right
+                [0, 0, 1], # move right
                 [0, -1, 0], # move down
+                [0, 0, -1], # move left
             ],
             "circle_ccw": [
                 [0, 0, 1], # move right
                 [0, 1, 0], # move up
                 [0, 0, -1], # move left
+                [0, 0, -1], # move left
                 [0, -1, 0], # move down
+                [0, 0, 1], # move right
             ],
             "up_and_down": [
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
             ],
-            "left_and_right": [
+            "left_and_right_up_and_down": [
                 [0, 0, -1], # move left
                 [0, 0, 1], # move right
                 [0, 0, 1], # move right
                 [0, 0, -1], # move left
+                [0, 1, 0], # move up
+                [0, -1, 0], # move down
             ],
         }
 
