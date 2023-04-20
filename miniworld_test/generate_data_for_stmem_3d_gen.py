@@ -158,7 +158,7 @@ for type, num_ep in data_type.items():
         # back (back is with object at the beginning)
         for _ in range(18): # move from 90 to 0
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
-        env_with_objects.roll_back_object()
+        env_with_objects.rollback_objects()
         for i in range(4):
             env_with_objects.replace_back_object(i)
             while True:
@@ -168,6 +168,7 @@ for type, num_ep in data_type.items():
             obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
             obss_without_objects.append(obs['image'])
             dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+        env_with_objects.remove_objects()
         
         # left
         for _ in range(18): # move from 0 to 270
@@ -186,6 +187,5 @@ for type, num_ep in data_type.items():
                 dict['gt_image'].copy().astype(np.uint8),
                 dict['query_image'].copy().astype(np.uint8),
                 data_dir, j)
-            exit(1)
         print(f'saving {type}/{j}-th episode in npz...')
         np.savez(f'{data_dir}/{type}/{j}.npz', **dict)
