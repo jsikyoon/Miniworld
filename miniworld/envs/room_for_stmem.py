@@ -5,12 +5,14 @@ from gymnasium import utils
 from miniworld.entity import COLOR_NAMES, Ball, Box, Key
 from miniworld.miniworld import MiniWorldEnv
 
+import numpy as np
+
 obs_width=84
 obs_height=84
 window_width=840
 window_height=840
 
-class RoomNoisyTVSTMEM(MiniWorldEnv, utils.EzPickle):
+class RoomSTMEM(MiniWorldEnv, utils.EzPickle):
     """
     ## Description
 
@@ -86,16 +88,7 @@ class RoomNoisyTVSTMEM(MiniWorldEnv, utils.EzPickle):
         #    )
         #self.place_entity(Key(color=colorlist[self.np_random.choice(len(colorlist))]))
         
-        self.place_entity(Box(color=colorlist[-1], size=0.6),
-                          pos=[self.size/2+5.2, 0.4, self.size/2], dir=0)
-        self.place_entity(Box(color=colorlist[-2], size=0.6),
-                          pos=[self.size/2+5.2, 1.0, self.size/2], dir=0)
-        self.place_entity(Box(color=colorlist[-3], size=0.6),
-                          pos=[self.size/2+5.2, 0.4, self.size/2+0.6], dir=0)
-        self.place_entity(Box(color=colorlist[-4], size=0.6),
-                          pos=[self.size/2+5.2, 1.0, self.size/2+0.6], dir=0)
-
-        self.place_agent(dir=0.785, pos=[self.size/2, 0, self.size/2])
+        self.place_agent(dir=180*np.pi/180, pos=[self.size/2, 0, self.size/2])
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)

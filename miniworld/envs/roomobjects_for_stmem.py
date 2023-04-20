@@ -171,3 +171,16 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             return True
         else:
             return False
+        
+    def remove_objects(self):
+        for i in range(len(self._actions)):
+            self.entities[i].pos[1] -= 100
+
+    def replace_back_object(self):
+        self.entities[len(self._actions)-2].pos[1] += 10 # back
+        self.entities[len(self._actions)-1].pos[1] -= 10 # back hidden
+        
+    def back_back_object(self):
+        self.entities[len(self._actions)-2].pos[1] += 100
+        
+                    

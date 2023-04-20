@@ -32,8 +32,8 @@ def generate_video(memory_image, gt_image, query_image, dir, idx):
         Image.fromarray(query_image[i]).save(f'{dir}/query{i}_{idx}.png')
 
 # setting
-total_num_ep = 10000
-data_dir = f'./datasets/room_with_without_objects_stmem_smfu'
+total_num_ep = 20000
+data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen'
 Path(data_dir).mkdir(parents=True, exist_ok=True)
 data_type = {'train': int(total_num_ep * 0.9),
              'eval': int(total_num_ep * 0.1)}
@@ -115,8 +115,18 @@ for type, num_ep in data_type.items():
         dict["gt_image"] = np.array(obss_with_objects)
         dict["gt_dir"] = np.array(dirs_with_objects)
         
+        # back 45
+        for _ in range(9): # move from 45 to 0
+            obs, _, _, _, _ = env_with_objects.step(1) # turn right
+        env_with_objects.replace_back_object()
+        gt_images, gt_dirs = collect_gt_images(obs)
+        obss_with_objects.append(gt_images)
+        dirs_with_objects.append(gt_dirs)
+        dict["gt_image"] = np.array(obss_with_objects)
+        dict["gt_dir"] = np.array(dirs_with_objects)
+            
         # back to origin position
-        for _ in range(9+36): # move from 45 to 180
+        for _ in range(36): # move from 45 to 180
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
 
         # observations without objects (front / front-right / right / back-right views)
@@ -145,6 +155,18 @@ for type, num_ep in data_type.items():
         obss_without_objects.append(obs['image'])
         dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
        
+        # back (back is with object at the beginning)
+        for _ in range(9): # move from 45 to 0
+            obs, _, _, _, _ = env_with_objects.step(1) # turn right
+        env_with_objects.back_back_object()
+        while True:
+            if env_with_objects.action_start():
+                break
+            obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+        obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+        obss_without_objects.append(obs['image'])
+        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+            
         dict['query_image'] = np.array(obss_without_objects)
         dict['query_dir'] = np.array(dirs_without_objects)
 
