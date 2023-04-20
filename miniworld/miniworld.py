@@ -726,8 +726,8 @@ class MiniWorldEnv(gym.Env):
         rand = self.np_random if self.domain_rand else None
         fwd_step = self.params.sample(rand, "forward_step")
         fwd_drift = self.params.sample(rand, "forward_drift")
-        turn_step = self.params.sample(rand, "turn_step")
-        #turn_step = self.params.sample(self.np_random, "turn_step")
+        #turn_step = self.params.sample(rand, "turn_step")
+        turn_step = self.params.sample(self.np_random, "turn_step")
 
         if action == self.actions.move_forward:
             self.move_agent(fwd_step, fwd_drift)

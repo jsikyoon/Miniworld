@@ -156,7 +156,7 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)
-        if self.step_count == 45:
+        if self.step_count == 42:
             self.entities[len(self._actions)-2].pos[1] -= 10 # back
             self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
         for i in range(len(self._actions)):
@@ -180,7 +180,16 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         self.entities[len(self._actions)-2].pos[1] += 10 # back
         self.entities[len(self._actions)-1].pos[1] -= 10 # back hidden
         
-    def back_back_object(self):
-        self.entities[len(self._actions)-2].pos[1] += 100
+    def replace_back_hidden_object(self):
+        self.entities[len(self._actions)-2].pos[1] -= 10 # back
+        self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
         
+    def back_back_object(self):
+        self.entities[len(self._actions)-2].pos[1] += 110 # because back is hidden with two functions
+        
+    def remove_back_object(self):
+        self.entities[len(self._actions)-2].pos[1] -= 100
+       
+    def back_back_hidden_object(self):
+        self.entities[len(self._actions)-1].pos[1] += 100
                     
