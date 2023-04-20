@@ -135,8 +135,10 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             #"back-right":  [self.size/2+3.5, 0, self.size/2-3.5, 225*np.pi/180], # the back right corner
             "right":       [self.size/2,     0, self.size/2-4.5, 270*np.pi/180], # right
             #"front-right": [self.size/2-3.5, 0, self.size/2-3.5, 315*np.pi/180], # the front right corner
-            "back":        [self.size/2+4.5, 0, self.size/2,     180*np.pi/180], # the back
-            "back_hidden": [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
+            "back1":        [self.size/2+4.5, 0, self.size/2,     180*np.pi/180], # the back
+            "back2":        [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
+            "back3":        [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
+            "back4":        [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
         }
 
         self._actions = [] 
@@ -151,14 +153,25 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 self.place_entity(Key(color=colorlist[self.np_random.choice(len(colorlist))], size=0.4), pos=pos[:3], dir=dir)
             self._actions.append(self._action_set[self.np_random.choice(list(self._action_set.keys()))])
         self._action_idxs = [0]*len(self._actions)
+        self._back_idxs = [len(self._actions)-4, len(self._actions)-3, len(self._actions)-2, len(self._actions)-1]
+        self._active_back_idx = 0
 
         self.place_agent(dir=225*np.pi/180, pos=[self.size/2, 0, self.size/2]) # start from 45 angle
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)
         if self.step_count == 54:
-            self.entities[len(self._actions)-2].pos[1] -= 10 # back
-            self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
+            self.entities[len(self._actions)-4].pos[1] -= 10 # back1
+            self.entities[len(self._actions)-3].pos[1] += 10 # back2
+            self._active_back_idx = 1
+        if self.step_count == 72:
+            self.entities[len(self._actions)-3].pos[1] -= 10 # back2
+            self.entities[len(self._actions)-2].pos[1] += 10 # back3
+            self._active_back_idx = 2
+        if self.step_count == 90:
+            self.entities[len(self._actions)-2].pos[1] -= 10 # back3
+            self.entities[len(self._actions)-1].pos[1] += 10 # back4
+            self._active_back_idx = 3
         for i in range(len(self._actions)):
             self.entities[i].pos[0] = self.entities[i].pos[0] + self._actions[i][self._action_idxs[i]][0] * np.cos(self.entities[i].dir) + self._actions[i][self._action_idxs[i]][2] * np.sin(self.entities[i].dir) # originally -sin, but used + in this env
             self.entities[i].pos[1] += self._actions[i][self._action_idxs[i]][1]
@@ -176,20 +189,11 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         for i in range(len(self._actions)):
             self.entities[i].pos[1] -= 100
 
-    def replace_back_object(self):
-        self.entities[len(self._actions)-2].pos[1] += 10 # back
-        self.entities[len(self._actions)-1].pos[1] -= 10 # back hidden
-        
-    def replace_back_hidden_object(self):
-        self.entities[len(self._actions)-2].pos[1] -= 10 # back
-        self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
-        
-    def back_back_object(self):
-        self.entities[len(self._actions)-2].pos[1] += 110 # because back is hidden with two functions
-        
-    def remove_back_object(self):
-        self.entities[len(self._actions)-2].pos[1] -= 100
-       
-    def back_back_hidden_object(self):
-        self.entities[len(self._actions)-1].pos[1] += 100
-                    
+    def rollback_objects(self):
+        for i in range(len(self._actions)):
+            self.entities[i].pos[1] += 100
+
+    def replace_back_object(self, back_idx=0):
+        self.entities[self._back_idxs[self._active_back_idx]].pos[1] -= 10
+        self.entities[self._back_idxs[back_idx]].pos[1] += 10
+        self._active_back_idx = back_idx

@@ -116,17 +116,14 @@ for type, num_ep in data_type.items():
         obss_with_objects.append(gt_images)
         dirs_with_objects.append(gt_dirs)
         
-        # back 0 (two images one is old and another is recent)
+        # back 0 (multiple images)
         for _ in range(18): # move from 90 to 0
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
-        env_with_objects.replace_back_object()
-        gt_images, gt_dirs = collect_gt_images(obs)
-        obss_with_objects.append(gt_images)
-        dirs_with_objects.append(gt_dirs)
-        env_with_objects.replace_back_hidden_object()
-        gt_images, gt_dirs = collect_gt_images(obs)
-        obss_with_objects.append(gt_images)
-        dirs_with_objects.append(gt_dirs)
+        for i in range(4):
+            env_with_objects.replace_back_object(i)
+            gt_images, gt_dirs = collect_gt_images(obs)
+            obss_with_objects.append(gt_images)
+            dirs_with_objects.append(gt_dirs)
         dict["gt_image"] = np.array(obss_with_objects)
         dict["gt_dir"] = np.array(dirs_with_objects)
         
@@ -161,23 +158,16 @@ for type, num_ep in data_type.items():
         # back (back is with object at the beginning)
         for _ in range(18): # move from 90 to 0
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
-        env_with_objects.back_back_object()
-        while True:
-            if env_with_objects.action_start():
-                break
+        env_with_objects.roll_back_object()
+        for i in range(4):
+            env_with_objects.replace_back_object(i)
+            while True:
+                if env_with_objects.action_start():
+                    break
+                obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
             obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
-        obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
-        obss_without_objects.append(obs['image'])
-        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-        env_with_objects.remove_back_object()
-        env_with_objects.back_back_hidden_object()
-        while True:
-            if env_with_objects.action_start():
-                break
-            obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
-        obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
-        obss_without_objects.append(obs['image'])
-        dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
+            obss_without_objects.append(obs['image'])
+            dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
         
         # left
         for _ in range(18): # move from 0 to 270
