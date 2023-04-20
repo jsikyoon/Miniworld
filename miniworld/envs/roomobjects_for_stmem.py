@@ -129,12 +129,12 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         # [x,y,z,dir] 
         positions = {
             "front":       [self.size/2-4.5, 0, self.size/2,     0*np.pi/180], # front
-            "front-left":  [self.size/2-3.5, 0, self.size/2+3.5, 45*np.pi/180], # the front-left corner
+            #"front-left":  [self.size/2-3.5, 0, self.size/2+3.5, 45*np.pi/180], # the front-left corner
             "left":        [self.size/2,     0, self.size/2+4.5, 90*np.pi/180], # left
-            "back-left":   [self.size/2+3.5, 0, self.size/2+3.5, 125*np.pi/180], # the back left corner
-            "back-right":  [self.size/2+3.5, 0, self.size/2-3.5, 225*np.pi/180], # the back right corner
+            #"back-left":   [self.size/2+3.5, 0, self.size/2+3.5, 125*np.pi/180], # the back left corner
+            #"back-right":  [self.size/2+3.5, 0, self.size/2-3.5, 225*np.pi/180], # the back right corner
             "right":       [self.size/2,     0, self.size/2-4.5, 270*np.pi/180], # right
-            "front-right": [self.size/2-3.5, 0, self.size/2-3.5, 315*np.pi/180], # the front right corner
+            #"front-right": [self.size/2-3.5, 0, self.size/2-3.5, 315*np.pi/180], # the front right corner
             "back":        [self.size/2+4.5, 0, self.size/2,     180*np.pi/180], # the back
             "back_hidden": [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
         }
@@ -152,7 +152,7 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             self._actions.append(self._action_set[self.np_random.choice(list(self._action_set.keys()))])
         self._action_idxs = [0]*len(self._actions)
 
-        self.place_agent(dir=180*np.pi/180, pos=[self.size/2, 0, self.size/2]) # start from 45 angle
+        self.place_agent(dir=225*np.pi/180, pos=[self.size/2, 0, self.size/2]) # start from 45 angle
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)
