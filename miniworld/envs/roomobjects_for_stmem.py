@@ -71,20 +71,20 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         
         self._action_set = {
             "circle_cw": [
-                [0, 0, -0.5], # move left
+                [0, 0, -1], # move left
                 [0, 1, 0], # move up
-                [0, 0, 0.5], # move right
-                [0, 0, 0.5], # move right
+                [0, 0, 1], # move right
+                [0, 0, 1], # move right
                 [0, -1, 0], # move down
-                [0, 0, -0.5], # move left
+                [0, 0, -1], # move left
             ],
             "circle_ccw": [
-                [0, 0, 0.5], # move right
+                [0, 0, 1], # move right
                 [0, 1, 0], # move up
-                [0, 0, -0.5], # move left
-                [0, 0, -0.5], # move left
+                [0, 0, -1], # move left
+                [0, 0, -1], # move left
                 [0, -1, 0], # move down
-                [0, 0, 0.5], # move right
+                [0, 0, 1], # move right
             ],
             "up_and_down": [
                 [0, 1, 0], # move up
@@ -95,10 +95,10 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [0, -1, 0], # move down
             ],
             "left_and_right_up_and_down": [
-                [0, 0, -0.5], # move left
-                [0, 0, 0.5], # move right
-                [0, 0, 0.5], # move right
-                [0, 0,-0.5], # move left
+                [0, 0, -1], # move left
+                [0, 0, 1], # move right
+                [0, 0, 1], # move right
+                [0, 0,-1], # move left
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
             ],
@@ -156,7 +156,7 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)
-        if self.step_count == 42:
+        if self.step_count == 54:
             self.entities[len(self._actions)-2].pos[1] -= 10 # back
             self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
         for i in range(len(self._actions)):
