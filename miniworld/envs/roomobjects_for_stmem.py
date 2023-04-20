@@ -2,7 +2,7 @@ import math
 
 from gymnasium import utils
 
-from miniworld.entity import COLOR_NAMES, Ball, Box, Key
+from miniworld.entity import COLOR_NAMES, Ball, Box, Key, Potion
 from miniworld.miniworld import MiniWorldEnv
 
 import numpy as np
@@ -11,6 +11,19 @@ obs_width=84
 obs_height=84
 window_width=840
 window_height=840
+
+OBJ_TYPES = ["box", "ball", "key"]
+COLORS = {
+    "Cyan": (0, 255, 255),
+    "Magenta": (255, 0, 255),
+    "Gray": (128, 128, 128),
+    "Brown": (165,42,42),
+    "Orange": (255, 165, 0),
+    "Purple": (128, 0, 128),
+    "Pink": (255, 192, 203),
+    "Teal": (0, 128, 128),
+    "Lavender": (230, 230, 250),
+}
 
 class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
     """
@@ -56,22 +69,22 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         assert size >= 2
         self.size = size
         
-        self._action_set_of_left_right = {
+        self._action_set = {
             "circle_cw": [
-                [-1, 0, 0], # move left
+                [0, 0, -0.5], # move left
                 [0, 1, 0], # move up
-                [1, 0, 0], # move right
-                [1, 0, 0], # move right
+                [0, 0, 0.5], # move right
+                [0, 0, 0.5], # move right
                 [0, -1, 0], # move down
-                [-1, 0, 0], # move left
+                [0, 0, -0.5], # move left
             ],
             "circle_ccw": [
-                [1, 0, 0], # move right
+                [0, 0, 0.5], # move right
                 [0, 1, 0], # move up
-                [-1, 0, 0], # move left
-                [-1, 0, 0], # move left
+                [0, 0, -0.5], # move left
+                [0, 0, -0.5], # move left
                 [0, -1, 0], # move down
-                [1, 0, 0], # move right
+                [0, 0, 0.5], # move right
             ],
             "up_and_down": [
                 [0, 1, 0], # move up
@@ -82,51 +95,15 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [0, -1, 0], # move down
             ],
             "left_and_right_up_and_down": [
-                [-1, 0, 0], # move left
-                [1, 0, 0], # move right
-                [1, 0, 0], # move right
-                [-1, 0, 0], # move left
+                [0, 0, -0.5], # move left
+                [0, 0, 0.5], # move right
+                [0, 0, 0.5], # move right
+                [0, 0,-0.5], # move left
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
             ],
         }
         
-        self._action_set_of_front_back = {
-            "circle_cw": [
-                [0, 0, -1], # move left
-                [0, 1, 0], # move up
-                [0, 0, 1], # move right
-                [0, 0, 1], # move right
-                [0, -1, 0], # move down
-                [0, 0, -1], # move left
-            ],
-            "circle_ccw": [
-                [0, 0, 1], # move right
-                [0, 1, 0], # move up
-                [0, 0, -1], # move left
-                [0, 0, -1], # move left
-                [0, -1, 0], # move down
-                [0, 0, 1], # move right
-            ],
-            "up_and_down": [
-                [0, 1, 0], # move up
-                [0, -1, 0], # move down
-                [0, 1, 0], # move up
-                [0, -1, 0], # move down
-                [0, 1, 0], # move up
-                [0, -1, 0], # move down
-            ],
-            "left_and_right_up_and_down": [
-                [0, 0, -1], # move left
-                [0, 0, 1], # move right
-                [0, 0, 1], # move right
-                [0, 0, -1], # move left
-                [0, 1, 0], # move up
-                [0, -1, 0], # move down
-            ],
-        }
-
-
         MiniWorldEnv.__init__(self, 
                               obs_width=obs_width,
                               obs_height=obs_height,
@@ -149,41 +126,43 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         # Reduce chances that objects are too close to see
         self.agent.radius = 5.0
         colorlist = list(COLOR_NAMES)
-       
+        # [x,y,z,dir] 
+        positions = {
+            "front":       [self.size/2-4.5, 0, self.size/2,     0*np.pi/180], # front
+            "front-left":  [self.size/2-3.5, 0, self.size/2+3.5, 45*np.pi/180], # the front-left corner
+            "left":        [self.size/2,     0, self.size/2+4.5, 90*np.pi/180], # left
+            "back-left":   [self.size/2+3.5, 0, self.size/2+3.5, 125*np.pi/180], # the back left corner
+            "back-right":  [self.size/2+3.5, 0, self.size/2-3.5, 225*np.pi/180], # the back right corner
+            "right":       [self.size/2,     0, self.size/2-4.5, 270*np.pi/180], # right
+            "front-right": [self.size/2-3.5, 0, self.size/2-3.5, 315*np.pi/180], # the front right corner
+            "back":        [self.size/2+4.5, 0, self.size/2,     180*np.pi/180], # the back
+            "back_hidden": [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
+        }
+
         self._actions = [] 
-        # object on the front
-        self.place_entity(
-            Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9),
-            pos=[self.size/2+4.5, 0, self.size/2]
-        )
-        self._actions.append(self._action_set_of_front_back[self.np_random.choice(list(self._action_set_of_front_back.keys()))])
-        # object on the left
-        self.place_entity(
-            Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9),
-            pos=[self.size/2, 0, self.size/2-4.5]
-        )
-        self._actions.append(self._action_set_of_left_right[self.np_random.choice(list(self._action_set_of_left_right.keys()))])
-        # object on the right
-        self.place_entity(
-            Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9),
-            pos=[self.size/2, 0, self.size/2+4.5]
-        )
-        self._actions.append(self._action_set_of_left_right[self.np_random.choice(list(self._action_set_of_left_right.keys()))])
-         # object on the back
-        self.place_entity(
-            Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9),
-            pos=[self.size/2-4.5, 0, self.size/2]
-        )
-        self._actions.append(self._action_set_of_front_back[self.np_random.choice(list(self._action_set_of_front_back.keys()))])
-     
+        for pos_name, pos in positions.items():
+            dir = pos[3]
+            _type = np.random.choice(OBJ_TYPES)
+            if _type == "ball":
+                self.place_entity(Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.75), pos=pos[:3], dir=dir)
+            elif _type == "box":
+                self.place_entity(Box(color=colorlist[self.np_random.choice(len(colorlist))], size=0.75), pos=pos[:3], dir=dir)
+            elif _type == "key":
+                self.place_entity(Key(color=colorlist[self.np_random.choice(len(colorlist))], size=0.4), pos=pos[:3], dir=dir)
+            self._actions.append(self._action_set[self.np_random.choice(list(self._action_set.keys()))])
         self._action_idxs = [0]*len(self._actions)
 
-        self.place_agent(dir=0.785, pos=[self.size/2, 0, self.size/2]) # start from 45 angle
+        self.place_agent(dir=180*np.pi/180, pos=[self.size/2, 0, self.size/2]) # start from 45 angle
 
     def step(self, action):
         obs, reward, termination, truncation, info = super().step(action)
+        if self.step_count == 45:
+            self.entities[len(self._actions)-2].pos[1] -= 10 # back
+            self.entities[len(self._actions)-1].pos[1] += 10 # back hidden
         for i in range(len(self._actions)):
-            self.entities[i].pos = [x + y for x, y in zip(self.entities[i].pos, self._actions[i][self._action_idxs[i]])]
+            self.entities[i].pos[0] = self.entities[i].pos[0] + self._actions[i][self._action_idxs[i]][0] * np.cos(self.entities[i].dir) + self._actions[i][self._action_idxs[i]][2] * np.sin(self.entities[i].dir) # originally -sin, but used + in this env
+            self.entities[i].pos[1] += self._actions[i][self._action_idxs[i]][1]
+            self.entities[i].pos[2] = self.entities[i].pos[2] + self._actions[i][self._action_idxs[i]][0] * np.sin(self.entities[i].dir) + self._actions[i][self._action_idxs[i]][2] * np.cos(self.entities[i].dir)
             self._action_idxs[i] = (self._action_idxs[i] + 1) % len(self._actions[i])
         return obs, reward, termination, truncation, info
 

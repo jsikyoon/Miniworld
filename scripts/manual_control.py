@@ -14,6 +14,8 @@ from pyglet.window import key
 
 import miniworld
 
+import numpy as np
+
 # import sys
 
 
@@ -46,12 +48,12 @@ print("============")
 print("move: arrow keys\npickup: P\ndrop: D\ndone: ENTER\nquit: ESC")
 print("============")
 
-env.reset()
+obs, info = env.reset(seed=0)
 
 # Create the display window
 env.render()
 
-
+obss = [obs["image"]]
 def step(action):
     print(
         "step {}/{}: {}".format(
@@ -60,6 +62,7 @@ def step(action):
     )
 
     obs, reward, termination, truncation, info = env.step(action)
+    obss.append(obs["image"])
 
     if reward > 0:
         print(f"reward={reward:.2f}")
@@ -126,3 +129,7 @@ def on_close():
 pyglet.app.run()
 
 env.close()
+
+import imageio
+obss = np.array(obss).copy().astype(np.uint8)
+imageio.mimsave(f'obss.gif', obss, fps=4)
