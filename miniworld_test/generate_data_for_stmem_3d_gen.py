@@ -32,8 +32,8 @@ def generate_video(memory_image, gt_image, query_image, dir, idx):
         Image.fromarray(query_image[i]).save(f'{dir}/query{i}_{idx}.png')
 
 # setting
-total_num_ep = 20000
-data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen'
+total_num_ep = 10000
+data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen2_various_angle'
 #data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen_various_angle'
 Path(data_dir).mkdir(parents=True, exist_ok=True)
 data_type = {'train': int(total_num_ep * 0.9),
@@ -103,6 +103,9 @@ for type, num_ep in data_type.items():
                 gt_dirs.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
             return gt_images, gt_dirs
         # front 180
+        print(env_with_objects.agent.dir)
+        env_with_objects.set_agent_dir(dir=180*np.pi/180)
+        print(env_with_objects.agent.dir);exit(1)
         for _ in range(9): # 225 -> 180
             obs, _, _, _, _ = env_with_objects.step(1) # turn right, back to original position
         gt_images, gt_dirs = collect_gt_images(obs)
@@ -124,8 +127,6 @@ for type, num_ep in data_type.items():
             gt_images, gt_dirs = collect_gt_images(obs)
             obss_with_objects.append(gt_images)
             dirs_with_objects.append(gt_dirs)
-        dict["gt_image"] = np.array(obss_with_objects)
-        dict["gt_dir"] = np.array(dirs_with_objects)
         
         # left 270
         for _ in range(18): # move from 0 to 270
@@ -141,24 +142,34 @@ for type, num_ep in data_type.items():
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
 
         # observations without objects
-        env_with_objects.remove_objects()
+        def get_initial_state():
+            while True:
+                if env_with_objects.action_start():
+                    break
+                obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+            obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
+            return obs
+        
+        #env_with_objects.remove_objects()
         obss_without_objects, dirs_without_objects = [], []
         # front
         for _ in range(9): # 225 -> 180
             obs, _, _, _, _ = env_with_objects.step(1) # turn right, back to original position
+        obs = get_initial_state()
         obss_without_objects.append(obs['image'])
         dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
        
         # right
         for _ in range(18): # move from 180 to 90
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
+        obs = get_initial_state()
         obss_without_objects.append(obs['image'])
         dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
         
         # back (back is with object at the beginning)
         for _ in range(18): # move from 90 to 0
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
-        env_with_objects.rollback_objects()
+        #env_with_objects.rollback_objects()
         for i in range(4):
             env_with_objects.replace_back_object(i)
             while True:
@@ -168,11 +179,12 @@ for type, num_ep in data_type.items():
             obs, _, _, _, _ = env_with_objects.step(2) # move forward (not working)
             obss_without_objects.append(obs['image'])
             dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
-        env_with_objects.remove_objects()
+        #env_with_objects.remove_objects()
         
         # left
         for _ in range(18): # move from 0 to 270
             obs, _, _, _, _ = env_with_objects.step(1) # turn right
+        obs = get_initial_state()
         obss_without_objects.append(obs['image'])
         dirs_without_objects.append(round(obs['agent_dir']/(2*np.pi)*360 % 360))
  
