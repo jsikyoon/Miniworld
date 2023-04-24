@@ -96,13 +96,21 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
                 [0, 1, 0], # move up
                 [0, -1, 0], # move down
             ],
-            "left_and_right_up_and_down": [
+            "left_and_right": [
                 [0, 0, -1], # move left
                 [0, 0, 1], # move right
                 [0, 0, 1], # move right
                 [0, 0,-1], # move left
-                [0, 1, 0], # move up
-                [0, -1, 0], # move down
+                [0, 0, -1], # move left
+                [0, 0, 1], # move right
+            ],
+            "topleft_and_topright": [
+                [0, 1, -1], # move left
+                [0, -1, 1], # move right
+                [0, 1, 1], # move right
+                [0, -1,-1], # move left
+                [0, 1, -1], # move left
+                [0, -1, 1], # move right
             ],
         }
         

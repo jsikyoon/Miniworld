@@ -37,8 +37,7 @@ total_num_ep = 10000
 st_num_ep = sys.argv[1]
 nd_num_ep = sys.argv[2]
 
-data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen2_various_angle'
-#data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen_various_angle'
+data_dir = f'./datasets/room_with_without_objects_stmem_3d_gen_various_angle'
 Path(data_dir).mkdir(parents=True, exist_ok=True)
 data_type = {'train': int(total_num_ep * 0.9),
              'eval': int(total_num_ep * 0.1)}
