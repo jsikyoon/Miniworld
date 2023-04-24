@@ -12,9 +12,9 @@ obs_height=84
 window_width=840
 window_height=840
 
-#OBJ_TYPES = ["box", "ball", "key"]
+OBJ_TYPES = ["box", "ball", "key"]
 #OBJ_TYPES = ["box", "ball"]
-OBJ_TYPES = ["box"]
+#OBJ_TYPES = ["box"]
 COLORS = {
     "Cyan": (0, 255, 255),
     "Magenta": (255, 0, 255),
@@ -128,6 +128,11 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         # Reduce chances that objects are too close to see
         self.agent.radius = 5.0
         colorlist = list(COLOR_NAMES)
+        overall_types = []
+        for obj_type in OBJ_TYPES:
+            for color in colorlist:
+                overall_types.append(obj_type + "_" + color)
+        np.random.shuffle(overall_types)
         # [x,y,z,dir] 
         positions = {
             "front":       [self.size/2-4.5, 0, self.size/2,     0*np.pi/180], # front
@@ -143,16 +148,18 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             "back4":        [self.size/2+4.5, -10, self.size/2,   180*np.pi/180], # the back hidden
         }
 
-        self._actions = [] 
-        for pos_name, pos in positions.items():
+        self._actions = []
+        for p_idx, pos in enumerate(positions.values()):
             dir = pos[3]
-            _type = np.random.choice(OBJ_TYPES)
+            _type = overall_types[p_idx].split("_")[0]
+            _color = overall_types[p_idx].split("_")[1]
+            #_type = np.random.choice(OBJ_TYPES)
             if _type == "ball":
-                self.place_entity(Ball(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9), pos=pos[:3], dir=dir)
+                self.place_entity(Ball(color=_color, size=0.9), pos=pos[:3], dir=dir)
             elif _type == "box":
-                self.place_entity(Box(color=colorlist[self.np_random.choice(len(colorlist))], size=0.9), pos=pos[:3], dir=dir)
-            #elif _type == "key":
-            #    self.place_entity(Key(color=colorlist[self.np_random.choice(len(colorlist))], size=0.4), pos=pos[:3], dir=dir)
+                self.place_entity(Box(color=_color, size=0.9), pos=pos[:3], dir=dir)
+            elif _type == "key":
+                self.place_entity(Key(color=_color, size=0.7), pos=pos[:3], dir=dir)
             self._actions.append(self._action_set[self.np_random.choice(list(self._action_set.keys()))])
         self._action_idxs = [0]*len(self._actions)
         self._back_idxs = [len(self._actions)-4, len(self._actions)-3, len(self._actions)-2, len(self._actions)-1]

@@ -409,9 +409,10 @@ class Room:
         # randomize wall textures
         # self.wall_tex_name_list = ['brick_wall', 'grass', 'lava', 'rock',
         #                            'stucco', 'water', 'wood', 'wood_planks']
-        brick_wall = Texture.get('brown')
-        self.wall_tex_name_list = ['blue', 'orange', 'green', 'red', 'purple',
-                                   'brown', 'pink', 'olive']
+        #brick_wall = Texture.get('brown')
+        #self.wall_tex_name_list = ['blue', 'orange', 'green', 'red', 'purple',
+        #                           'brown', 'pink', 'olive']
+        self.wall_tex_name_list = ['orange', 'brown', 'pink', 'olive']
         self.wall_tex_list = [Texture.get(name) for name in self.wall_tex_name_list]
         
         n_partial_wall = self.wall_verts.shape[0] // 4  
@@ -420,17 +421,17 @@ class Room:
         
         while True:
             if remain < 5:
-                #ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
+                ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
                 for i in range(remain):
-                    #self.ran_wall_tex_list.append(ran_wall_tex)
-                    self.ran_wall_tex_list.append(brick_wall)
+                    self.ran_wall_tex_list.append(ran_wall_tex)
+                    #self.ran_wall_tex_list.append(brick_wall)
                 break
             else:
                 wall_len = np.random.choice([3, 5], 1)[0]
-                #ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
+                ran_wall_tex = self.wall_tex_list[np.random.randint(len(self.wall_tex_list))]
                 for i in range(wall_len):
-                    #self.ran_wall_tex_list.append(ran_wall_tex)
-                    self.ran_wall_tex_list.append(brick_wall)
+                    self.ran_wall_tex_list.append(ran_wall_tex)
+                    #self.ran_wall_tex_list.append(brick_wall)
                 remain -= wall_len
         
         # print(remain)
