@@ -13,7 +13,8 @@ window_width=840
 window_height=840
 
 #OBJ_TYPES = ["box", "ball", "key"]
-OBJ_TYPES = ["box", "ball"]
+#OBJ_TYPES = ["box", "ball"]
+OBJ_TYPES = ["box"]
 COLORS = {
     "Cyan": (0, 255, 255),
     "Magenta": (255, 0, 255),
