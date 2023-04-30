@@ -1,7 +1,7 @@
 #!/bin/bash
 
 num_episodes=10000
-num_processes=10
+num_processes=20
 
 # Compute the number of episodes per process
 episodes_per_process=$((num_episodes / num_processes))
