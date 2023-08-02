@@ -132,4 +132,6 @@ env.close()
 
 import imageio
 obss = np.array(obss).copy().astype(np.uint8)
+for i in range(obss.shape[0]):
+    imageio.imwrite(f"obs_{i}.png", obss[i])
 imageio.mimsave(f'obss.gif', obss, fps=4)

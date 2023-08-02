@@ -134,7 +134,8 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
         )
 
         # Reduce chances that objects are too close to see
-        self.agent.radius = 5.0
+        #self.agent.radius = 5.0
+        self.agent.radius = 0.5
         colorlist = list(COLOR_NAMES)
         overall_types = []
         for obj_type in OBJ_TYPES:
@@ -161,6 +162,8 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             dir = pos[3]
             _type = overall_types[p_idx].split("_")[0]
             _color = overall_types[p_idx].split("_")[1]
+            #_type = "box"
+            #_color = "green"
             #_type = np.random.choice(OBJ_TYPES)
             if _type == "ball":
                 self.place_entity(Ball(color=_color, size=0.9), pos=pos[:3], dir=dir)
@@ -169,6 +172,7 @@ class RoomObjectsSTMEM(MiniWorldEnv, utils.EzPickle):
             elif _type == "key":
                 self.place_entity(Key(color=_color, size=0.7), pos=pos[:3], dir=dir)
             self._actions.append(self._action_set[self.np_random.choice(list(self._action_set.keys()))])
+            #self._actions.append(self._action_set["circle_cw"])
         self._action_idxs = [0]*len(self._actions)
         self._back_idxs = [len(self._actions)-4, len(self._actions)-3, len(self._actions)-2, len(self._actions)-1]
         self._active_back_idx = 0
